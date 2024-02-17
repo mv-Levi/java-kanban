@@ -2,10 +2,21 @@
 public class Subtask extends Task {
     private Epic epic;
 
-    public Subtask(int taskId, String name, String description, TaskStatus status, Epic epic) {
-        super(taskId, name, description, status);
+    public Subtask( String name, String description, TaskStatus status, Epic epic) {
+        super( name, description, status);
         this.epic = epic;
     }
+
+    public void setEpic(Epic newEpic) {
+        if (newEpic != this.epic) {
+            this.epic = newEpic;
+        } else {
+            System.out.println("Error: Cannot set subtask's epic to itself.");
+        }
+
+    }
+
+
 
     public Epic getEpic() {
         return epic;
@@ -38,4 +49,6 @@ public class Subtask extends Task {
     public String toString() {
         return String.format("Subtask %d: %s (%s) [Epic: %s]", getTaskId(), getname(), getStatus(), epic.getname());
     }
+
+
 }
