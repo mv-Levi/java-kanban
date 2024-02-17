@@ -2,8 +2,8 @@ import java.util.ArrayList;
 public class Epic extends Task{
     private ArrayList<Subtask> subtasks;
 
-    public Epic(int taskId, String name, String description, TaskStatus status) {
-        super(taskId, name, description, status);
+    public Epic(String name, String description, TaskStatus status) {
+        super( name, description, status);
         this.subtasks = new ArrayList<>();
     }
 
@@ -18,6 +18,11 @@ public class Epic extends Task{
     public boolean isEpicDone() {
         return subtasks.stream().allMatch(subtask -> subtask.getStatus() == TaskStatus.DONE);
     }
+
+    public void removeSubtask(Subtask subtask) {
+        subtasks.remove(subtask);
+    }
+
 
     @Override
     public TaskType getType() {
