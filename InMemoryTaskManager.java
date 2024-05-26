@@ -180,7 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void addTask(Task task) {
         LocalDateTime startTime = task.getStartTime();
-        LocalDateTime endTime = task.getEndTime(); // Предположим, что в Task есть метод getEndTime
+        LocalDateTime endTime = task.getEndTime();
 
         boolean isOverlapping = prioritizedTasks.stream()
                 .anyMatch(existingTask ->
@@ -216,7 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(taskId, updatedTask);
             prioritizedTasks.add(updatedTask);
         } else {
-            throw new IllegalArgumentException("Updated task overlaps with existing tasks.");
+            throw new IllegalArgumentException("Обновленная задача пересекается с существующими задачами");
         }
     }
 
@@ -265,7 +265,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         } else {
-            System.out.println("Subtask not found");
+            System.out.println("Подзадача не найдена");
         }
     }
 
@@ -278,7 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
             removeTaskAndSubtasks(epicToRemove);
             historyManager.remove(epicId);
         } else {
-            System.out.println("Epic not found");
+            System.out.println("Эпик не найден");
         }
     }
 

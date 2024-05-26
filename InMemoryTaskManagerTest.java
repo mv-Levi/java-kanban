@@ -19,7 +19,8 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic = new Epic(1, "Epic", "Description", TaskStatus.NEW,
                 LocalDateTime.now(), Duration.ofHours(2));
         Subtask subtask = new Subtask(2, "Subtask 1", "Description 1",
-                TaskStatus.NEW, epic, LocalDateTime.of(2022, 1, 1, 9, 0), Duration.ofHours(2));
+                TaskStatus.NEW, epic, LocalDateTime.of(2022, 1, 1, 9, 0),
+                Duration.ofHours(2));
         taskManager.createEpic(epic);
         taskManager.createSubtask(subtask);
         assertEquals(epic, subtask.getEpic(), "Подзадача должна иметь связанный эпик");
@@ -34,7 +35,8 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         Epic epic = new Epic(1,"Epic 1", "Description 1", TaskStatus.DONE,
                 LocalDateTime.now(), Duration.ofHours(2));
         Subtask subtask = new Subtask(2, "Subtask 1", "Description 1",
-                TaskStatus.NEW, epic, LocalDateTime.of(2022, 1, 1, 9, 0), Duration.ofHours(2));
+                TaskStatus.NEW, epic, LocalDateTime.of(2022, 1, 1, 9, 0),
+                Duration.ofHours(2));
 
         taskManager.createTask(task);
         taskManager.createEpic(epic);
@@ -81,15 +83,18 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @Test
     void testGetPrioritizedTasks() {
-        Task task1 = new Task(1, "Task 1", "Description 1", TaskStatus.NEW, LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0), Duration.ofHours(2));
-        Task task2 = new Task(2, "Task 2", "Description 2", TaskStatus.NEW, LocalDateTime.of(2022, Month.JANUARY, 1, 10, 0), Duration.ofHours(2));
+        Task task1 = new Task(1, "Task 1", "Description 1", TaskStatus.NEW,
+                LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0), Duration.ofHours(2));
+        Task task2 = new Task(2, "Task 2", "Description 2", TaskStatus.NEW,
+                LocalDateTime.of(2022, Month.JANUARY, 1, 10, 0), Duration.ofHours(2));
 
         taskManager.createTask(task1);
         taskManager.createTask(task2);
 
         List<Task> tasks = new ArrayList<>(taskManager.getPrioritizedTasks());
 
-        assertTrue(tasks.indexOf(task2) < tasks.indexOf(task1), "Task 2 должен быть перед Task 1, так как начинается раньше");
+        assertTrue(tasks.indexOf(task2) < tasks.indexOf(task1),
+                "Task 2 должен быть перед Task 1, так как начинается раньше");
     }
 
 }

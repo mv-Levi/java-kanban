@@ -26,10 +26,12 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void testTaskCreationAndRetrieval() {
-        taskManager.createTask(new Task(1, "Test task", "Description", TaskStatus.NEW, LocalDateTime.now(), Duration.ofHours(2)));
+        taskManager.createTask(new Task(1, "Test task", "Description", TaskStatus.NEW,
+                LocalDateTime.now(), Duration.ofHours(2)));
         Task retrieved = taskManager.getTaskById(1);
-        assertNotNull(retrieved, "Task should be retrievable after creation");
-        assertEquals("Test task", retrieved.getName(), "Task name should match the created task");
+        assertNotNull(retrieved, "Задача должна быть доступна после создания");
+        assertEquals("Test task", retrieved.getName(),
+                "Название задачи должно соответствовать созданной задаче.");
     }
 
     @Test

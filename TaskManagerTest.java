@@ -18,7 +18,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 LocalDateTime.now(), Duration.ofHours(2)
         );
         taskManager.createTask(task);
-        assertNotNull(taskManager.getTaskById(1), "Task should be created and retrievable");
+        assertNotNull(taskManager.getTaskById(1), "Задача должна быть создана и доступна для извлечения.");
     }
 
     @Test
@@ -28,7 +28,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         );
         taskManager.createTask(task);
         taskManager.removeTaskById(1);
-        assertNull(taskManager.getTaskById(1), "Task should be removed and not retrievable");
+        assertNull(taskManager.getTaskById(1), "Задача должна быть удалена");
     }
 
     @Test
