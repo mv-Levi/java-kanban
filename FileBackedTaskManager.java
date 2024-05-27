@@ -78,19 +78,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
-        LocalDateTime startTime = LocalDateTime.parse(parts[6]); // Пример для dateTime
-        Duration duration = Duration.parse(parts[7]); // Пример для duration
+        LocalDateTime startTime = LocalDateTime.parse(parts[6]);
+        Duration duration = Duration.parse(parts[7]);
         Epic epic = null;
         if (type == TaskType.EPIC) {
             int numSubtasks = Integer.parseInt(parts[5]);
             epic = new Epic(id, name, description, status, startTime, duration);
             for (int i = 0; i < numSubtasks; i++) {
-                epic.addSubtask(null); // Добавляем пустые подзадачи
+                epic.addSubtask(null);
             }
         } else {
             int epicId = Integer.parseInt(parts[5]);
             InMemoryTaskManager taskManager = new InMemoryTaskManager();
-            epic = taskManager.getEpicById(epicId);// Получаем эпик по его идентификатору
+            epic = taskManager.getEpicById(epicId);
         }
         Task task = new Task(id, name, description, status, startTime, duration );
         return task;
@@ -107,7 +107,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // Метод восстановления истории из строки
     public static List<Integer> historyFromString(String value) {
         return Arrays.stream(value.split(","))
-                .filter(part -> !part.isEmpty()) // Убедимся, что части не пустые
+                .filter(part -> !part.isEmpty())
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
     }

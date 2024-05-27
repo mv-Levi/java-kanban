@@ -52,11 +52,11 @@ public class Epic extends Task {
 
     public void updateStartTime() {
         LocalDateTime newStartTime = subtasks.stream()
-                .map(Subtask::getStartTime) // используем геттер для безопасного доступа
-                .filter(java.util.Objects::nonNull) // фильтруем null значения
-                .min(LocalDateTime::compareTo) // находим минимальное время
+                .map(Subtask::getStartTime)
+                .filter(java.util.Objects::nonNull)
+                .min(LocalDateTime::compareTo)
                 .orElse(null);
-        setStartTime(newStartTime); // используем сеттер для обновления startTime
+        setStartTime(newStartTime);
     }
 
     public void updateEndTime() {

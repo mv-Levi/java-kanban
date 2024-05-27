@@ -32,7 +32,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail.next = newNode;
             newNode.prev = tail;
         }
-        tail = newNode; // Обновляем tail после добавления элемента
+        tail = newNode;
     }
 
 
@@ -63,7 +63,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail.next = node;
             node.prev = tail;
         }
-        tail = node; // Обновляем tail после добавления элемента
+        tail = node;
     }
 
     private void removeNode(Node node) {
@@ -78,10 +78,10 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail = node.prev;
         }
         if (tail == node) {
-            tail = node.prev; // Обновляем tail
+            tail = node.prev;
         }
         if (head == node) {
-            head = node.next; // Обновляем head
+            head = node.next;
         }
     }
 

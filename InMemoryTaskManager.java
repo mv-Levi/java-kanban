@@ -16,7 +16,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.tasks = new HashMap<>();
         this.epics = new HashMap<>();
         this.subtasks = new HashMap<>();
-        this.historyManager = new InMemoryHistoryManager(); // Создаем InMemoryHistoryManager по умолчанию
+        this.historyManager = new InMemoryHistoryManager();
         this.prioritizedTasks = new TreeSet<>(new TaskComparator());
     }
 
@@ -85,7 +85,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task getTaskById(int taskId) {
         Task task = tasks.get(taskId);
         if (task != null) {
-            historyManager.add(task); // Добавляем задачу в историю при просмотре
+            historyManager.add(task);
         }
         return task;
     }
@@ -160,16 +160,16 @@ public class InMemoryTaskManager implements TaskManager {
                     hasDone = true;
                     break;
                 case IN_PROGRESS:
-                    return TaskStatus.IN_PROGRESS;  // Возвращает IN_PROGRESS, если любая подзадача в процессе
+                    return TaskStatus.IN_PROGRESS;
             }
         }
 
         if (hasNew && hasDone) {
-            return TaskStatus.IN_PROGRESS;  // Возвращает IN_PROGRESS, если есть и выполненные, и не начатые подзадачи
+            return TaskStatus.IN_PROGRESS;
         } else if (hasDone) {
-            return TaskStatus.DONE;  // Все подзадачи выполнены
+            return TaskStatus.DONE;
         } else {
-            return TaskStatus.NEW;  // Все подзадачи новые или нет подзадач
+            return TaskStatus.NEW;
         }
     }
 
@@ -206,7 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime endTime = updatedTask.getEndTime();
 
         boolean isOverlapping = prioritizedTasks.stream()
-                .filter(t -> t.getTaskId() != taskId) // Исключаем саму задачу из проверки
+                .filter(t -> t.getTaskId() != taskId)
                 .anyMatch(existingTask ->
                         isOverlapping(startTime, endTime, existingTask.getStartTime(), existingTask.getEndTime())
                 );
@@ -245,9 +245,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeTaskById(int taskId) {
         Task taskToRemove = tasks.remove(taskId);
         if (taskToRemove != null) {
-            prioritizedTasks.remove(taskToRemove); // Удаление из приоритетного списка
-            removeTaskAndSubtasks(taskToRemove); // Дополнительные действия для удаления
-            historyManager.remove(taskId); // Удаление из истории
+            prioritizedTasks.remove(taskToRemove);
+            removeTaskAndSubtasks(taskToRemove);
+            historyManager.remove(taskId);
         }
     }
 
@@ -261,7 +261,7 @@ public class InMemoryTaskManager implements TaskManager {
             for (Epic epic : epics.values()) {
                 if (epic.getSubtasks().contains(subtaskToRemove)) {
                     epic.removeSubtask(subtaskToRemove);
-                    break; // Предполагаем, что подзадача может принадлежать только одному эпику
+                    break;
                 }
             }
         } else {
