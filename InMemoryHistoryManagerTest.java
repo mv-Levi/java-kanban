@@ -11,7 +11,7 @@ class InMemoryHistoryManagerTest {
     private HistoryManager historyManager;
     @BeforeEach
     public void setUp() {
-        historyManager = new InMemoryHistoryManager(); // Предполагаем, что это ваша реализация
+        historyManager = new InMemoryHistoryManager();
     }
 
     @Test
@@ -70,8 +70,8 @@ class InMemoryHistoryManagerTest {
         // Добавляем первую задачу
         historyManager.add(task1);
         List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size()); // Проверяем размер истории
-        assertEquals(task1, history.get(0)); // Проверяем наличие первой задачи в истории
+        assertEquals(1, history.size());
+        assertEquals(task1, history.get(0));
 
         // Добавляем вторую задачу
         historyManager.add(task2);

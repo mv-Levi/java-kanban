@@ -87,7 +87,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(epic.getSubtasks().contains(subtask1));
         assertTrue(epic.getSubtasks().contains(subtask2));
 
-        // Удаляем subtask1
+
         taskManager.removeSubtaskById(subtask1.getTaskId());
 
         assertFalse(epic.getSubtasks().contains(subtask1));
