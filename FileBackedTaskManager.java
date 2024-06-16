@@ -1,10 +1,14 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.stream.Collectors;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private File file;
@@ -35,20 +39,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+
+        LocalDateTime startTime = parts.length > 5 ? LocalDateTime.parse(parts[5], formatter) : null;
+        Duration duration = parts.length > 6 ? Duration.ofMinutes(Long.parseLong(parts[6])) : null;
         Epic epic = null;
-        if (parts.length > 5 && !parts[5].isEmpty()) {
-            int epicId = Integer.parseInt(parts[5]);
+        if (parts.length > 7 && !parts[7].isEmpty()) {
+            int epicId = Integer.parseInt(parts[7]);
             InMemoryTaskManager taskManager = new InMemoryTaskManager();
             epic = taskManager.getEpicById(epicId);
         }
 
         switch (type) {
             case "Task":
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, status, startTime, duration);
             case "Epic":
-                return new Epic(id, name, description, status);
+                return new Epic(id, name, description, status, startTime, duration);
             case "Subtask":
-                return new Subtask(id, name, description, status, epic);
+                return new Subtask(id, name, description, status, epic, startTime, duration);
             default:
                 throw new IllegalArgumentException("Неизвестный тип задания: " + type);
         }
@@ -70,40 +78,38 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
+        LocalDateTime startTime = LocalDateTime.parse(parts[6]);
+        Duration duration = Duration.parse(parts[7]);
         Epic epic = null;
         if (type == TaskType.EPIC) {
             int numSubtasks = Integer.parseInt(parts[5]);
-            epic = new Epic(id, name, description, status);
+            epic = new Epic(id, name, description, status, startTime, duration);
             for (int i = 0; i < numSubtasks; i++) {
-                epic.addSubtask(null); // Добавляем пустые подзадачи
+                epic.addSubtask(null);
             }
         } else {
             int epicId = Integer.parseInt(parts[5]);
             InMemoryTaskManager taskManager = new InMemoryTaskManager();
-            epic = taskManager.getEpicById(epicId);// Получаем эпик по его идентификатору
+            epic = taskManager.getEpicById(epicId);
         }
-        Task task = new Task(id, name, description, status);
+        Task task = new Task(id, name, description, status, startTime, duration );
         return task;
     }
 
     // Метод сохранения истории в строку
     public static String historyToString(HistoryManager manager) {
         List<Task> tasks = manager.getHistory();
-        StringBuilder sb = new StringBuilder();
-        for (Task task : tasks) {
-            sb.append(task.getTaskId()).append(",");
-        }
-        return sb.toString();
+        return tasks.stream()
+                .map(task -> String.valueOf(task.getTaskId()))
+                .collect(Collectors.joining(","));
     }
 
     // Метод восстановления истории из строки
     public static List<Integer> historyFromString(String value) {
-        String[] parts = value.split(",");
-        List<Integer> taskIds = new ArrayList<>();
-        for (String part : parts) {
-            taskIds.add(Integer.parseInt(part));
-        }
-        return taskIds;
+        return Arrays.stream(value.split(","))
+                .filter(part -> !part.isEmpty())
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
     }
 
     public void saveToFile() throws ManagerSaveException {

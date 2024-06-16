@@ -1,47 +1,78 @@
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class FileBackedTaskManagerTest {
-    private File tempFile;
-    private FileBackedTaskManager taskManager;
 
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
+    private File testFile;
+    @Override
     @BeforeEach
-    public void setUp() throws IOException {
-        tempFile = File.createTempFile("task_manager", ".txt");
-        taskManager = new FileBackedTaskManager(tempFile);
+    public void setUp() {
+        try {
+            testFile = File.createTempFile("tasks", ".txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Не удалось создать временный файл для тестов.");
+        }
+        taskManager = new FileBackedTaskManager(testFile);
+    }
+
+
+    @Test
+    public void testTaskCreationAndRetrieval() {
+        taskManager.createTask(new Task(1, "Test task", "Description", TaskStatus.NEW,
+                LocalDateTime.now(), Duration.ofHours(2)));
+        Task retrieved = taskManager.getTaskById(1);
+        assertNotNull(retrieved, "Задача должна быть доступна после создания");
+        assertEquals("Test task", retrieved.getName(),
+                "Название задачи должно соответствовать созданной задаче.");
     }
 
     @Test
-    public void testSaveEmptyFile() throws ManagerSaveException {
-        taskManager.saveToFile(); // Сохраняем пустой файл
-        assertTrue(tempFile.exists()); // Проверяем, что файл существует
-        assertEquals(0, tempFile.length()); // Проверяем, что размер файла равен нулю
+    public void testSaveEmptyFile() {
+        assertDoesNotThrow(() -> taskManager.saveToFile());
+        assertTrue(testFile.exists());
+        assertEquals(0, testFile.length());
     }
 
     @Test
-    void testSaveAndLoadTasks() throws ManagerSaveException, IOException {
-        File tempFile = File.createTempFile("temp_tasks", ".txt");
-        tempFile.deleteOnExit();
+    public void testSaveAndLoad() {
+        Task task = new Task(1, "Test task", "Description", TaskStatus.NEW,
+                LocalDateTime.of(2024, 5, 26, 12, 0), Duration.ofHours(2));
+        taskManager.createTask(task);
 
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(tempFile);
+        assertDoesNotThrow(() -> taskManager.saveToFile());
 
-        Task task1 = new Task(1,"Task1", "Description task1", TaskStatus.NEW);
-        Task task2 = new Task(2,"Task2", "Description task2", TaskStatus.IN_PROGRESS);
+        FileBackedTaskManager loadedManager = null;
+        try {
+            loadedManager = FileBackedTaskManager.loadFromFile(testFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Не удалось загрузить менеджер задач из файла.");
+        }
 
-        taskManager.createTask(task1);
-        taskManager.createTask(task2);
-
-        taskManager.saveToFile();
-
-        FileBackedTaskManager loadedTaskManager = FileBackedTaskManager.loadFromFile(tempFile);
-        List<Task> loadedTasks = loadedTaskManager.getAllTasks();
-
-        assertEquals(2, loadedTasks.size()); // Эта строка вызывает ошибку
-        assertEquals(task1, loadedTasks.get(0));
-        assertEquals(task2, loadedTasks.get(1));
+        assertNotNull(loadedManager);
+        Task loadedTask = loadedManager.getTaskById(1);
+        assertNotNull(loadedTask);
+        assertEquals(task.getName(), loadedTask.getName());
+        assertEquals(task.getDescription(), loadedTask.getDescription());
+        assertEquals(task.getStatus(), loadedTask.getStatus());
+        assertEquals(task.getStartTime(), loadedTask.getStartTime());
+        assertEquals(task.getDuration(), loadedTask.getDuration());
     }
+
+    @AfterEach
+    public void tearDown() {
+        // Удаляем файл после каждого теста
+        if (testFile != null && testFile.exists()) {
+            testFile.delete();
+        }
+    }
+
 }

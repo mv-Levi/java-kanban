@@ -1,11 +1,16 @@
+import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 
 public class Subtask extends Task {
     private Epic epic;
 
-    public Subtask(int taskId, String name, String description, TaskStatus status, Epic epic) {
-        super(taskId, name, description, status);
+
+    public Subtask(int taskId, String name, String description, TaskStatus status, Epic epic, LocalDateTime startTime, Duration duration) {
+        super(taskId, name, description, status, startTime, duration);
         this.epic = epic;
     }
+
 
     public void setEpic(Epic newEpic) {
         if (newEpic != this.epic) {
@@ -47,7 +52,28 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return String.format("Subtask %d: %s (%s) [Epic: %s]", getTaskId(), getname(), getStatus(), epic.getname());
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        return String.format("Subtask %d: %s (%s) [Epic: %s], StartTime: %s, Duration: %d minutes",
+                getTaskId(),
+                getName(),
+                getStatus(),
+                epic.getName(),
+                (getStartTime() != null ? getStartTime().format(formatter) : "Не указано"),
+                (getDuration() != null ? getDuration().toMinutes() : 0));
+    }
+
+    @Override
+    public String toFileString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        return String.format("%d,%s,%s,%s,%s,%s,%d,%d",
+                getTaskId(),
+                getClass().getSimpleName(),
+                getName(),
+                getStatus(),
+                getDescription(),
+                (getStartTime() != null ? getStartTime().format(formatter) : ""),
+                (getDuration() != null ? getDuration().toMinutes() : 0),
+                getEpic().getTaskId());
     }
 
 
