@@ -1,88 +1,78 @@
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> subtasks;
+    private List<Integer> subtaskIds = new ArrayList<>();
     private LocalDateTime endTime;
+    private transient TaskManager taskManager;
 
     public Epic(int taskId, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration) {
         super(taskId, name, description, status, startTime, duration);
-        this.subtasks = new ArrayList<>();
-        this.endTime = null;
     }
 
-    public Duration calculateTotalDuration() {
-        return subtasks.stream()
-                .map(Subtask::getDuration)
-                .filter(java.util.Objects::nonNull)
-                .reduce(Duration.ZERO, Duration::plus);
+    public Epic(int taskId, String name, String description, TaskStatus status, LocalDateTime startTime, Duration duration, TaskManager taskManager) {
+        super(taskId, name, description, status, startTime, duration);
+        this.taskManager = taskManager;
     }
 
-    public LocalDateTime calculateEndTime() {
-        return subtasks.stream()
-                .map(subtask -> subtask.getStartTime().plusMinutes(subtask.getDuration().toMinutes()))
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+    public void setTaskManager(TaskManager taskManager) {
+        this.taskManager = taskManager;
+    }
+
+    public List<Integer> getSubtaskIds() {
+        return subtaskIds;
     }
 
     public void addSubtask(Subtask subtask) {
-        subtasks.add(subtask);
+        subtaskIds.add(subtask.getTaskId());
+        System.out.println("Подзадача " + subtask.getTaskId() + " добавлена в эпик " + this.getTaskId());
+    }
+    public void addSubtaskId(int subtaskId) {
+        subtaskIds.add(subtaskId);
+    }
+
+    public void removeSubtaskId(int subtaskId) {
+        subtaskIds.remove(Integer.valueOf(subtaskId));
+    }
+
+    public void updateTimings() {
         updateStartTime();
         updateEndTime();
-        updateDuration();
     }
-
-    public void removeSubtask(Subtask subtask) {
-        subtasks.remove(subtask);
-        updateStartTime();
-        updateDuration();
-        updateEndTime();
-    }
-
-    public void updateDuration() {
-        Duration newDuration = subtasks.stream()
-                .map(Subtask::getDuration)
-                .filter(java.util.Objects::nonNull)
-                .reduce(Duration.ZERO, Duration::plus);
-        setDuration(newDuration);
-    }
-
     public void updateStartTime() {
-        LocalDateTime newStartTime = subtasks.stream()
-                .map(Subtask::getStartTime)
-                .filter(java.util.Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
-        setStartTime(newStartTime);
+        LocalDateTime earliest = null;
+        for (int subtaskId : subtaskIds) {
+            Subtask subtask = taskManager.getSubtaskById(subtaskId);
+            if (earliest == null || (subtask.getStartTime() != null && subtask.getStartTime().isBefore(earliest))) {
+                earliest = subtask.getStartTime();
+            }
+        }
+        this.setStartTime(earliest);
     }
+
 
     public void updateEndTime() {
-        LocalDateTime latestEndTime = subtasks.stream()
-                .map(subtask -> {
-                    if (subtask.getStartTime() != null && subtask.getDuration() != null) {
-                        return subtask.getStartTime().plusMinutes(subtask.getDuration().toMinutes());
-                    }
-                    return null;
-                })
-                .filter(java.util.Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+        LocalDateTime latest = null;
+        for (int subtaskId : subtaskIds) {
+            Subtask subtask = taskManager.getSubtaskById(subtaskId);
+            LocalDateTime subtaskEndTime = subtask.getStartTime().plus(subtask.getDuration());
+            if (latest == null || (subtaskEndTime != null && subtaskEndTime.isAfter(latest))) {
+                latest = subtaskEndTime;
+            }
+        }
+        this.endTime = latest;
     }
 
 
-    public ArrayList<Subtask> getSubtasks() {
-        return subtasks;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
-    public boolean isEpicDone() {
-        return subtasks.stream().allMatch(subtask -> subtask.getStatus() == TaskStatus.DONE);
-    }
-
-    public void setDuration(Duration duration) {
-        super.setDuration(duration);
+    private void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     @Override
@@ -90,10 +80,6 @@ public class Epic extends Task {
         return TaskType.EPIC;
     }
 
-    @Override
-    public boolean isEpic() {
-        return true;
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -105,19 +91,18 @@ public class Epic extends Task {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(getTaskId());
+        return Objects.hash(getTaskId());
     }
 
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-        return String.format("Epic %d: %s (%s) [Subtasks: %d], , StartTime: %s, EndTime: %s, Duration: %d minutes",
+        return String.format("Epic %d: %s (%s), StartTime: %s, Duration: %d minutes, Subtasks: %s",
                 getTaskId(),
                 getName(),
                 getStatus(),
-                subtasks.size(),
-                (getStartTime() != null ? getStartTime().format(formatter) : "Не указано"),
-                (getEndTime() != null ? getEndTime().format(formatter) : "Не указано"),
-                (getDuration() != null ? getDuration().toMinutes() : 0));
+                getStartTime(),
+                getDuration().toMinutes(),
+                subtaskIds);
     }
+
 }

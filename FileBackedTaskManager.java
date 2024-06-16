@@ -15,6 +15,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private int taskId;
     private String name;
     private TaskStatus status;
+    private static TaskManager taskManager;
 
     public FileBackedTaskManager(File file) {
         this.file = file;
@@ -54,9 +55,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             case "Task":
                 return new Task(id, name, description, status, startTime, duration);
             case "Epic":
-                return new Epic(id, name, description, status, startTime, duration);
+                return new Epic(id, name, description, status, startTime, duration, taskManager);
             case "Subtask":
-                return new Subtask(id, name, description, status, epic, startTime, duration);
+                return new Subtask(id, name, description, status, epic.getTaskId(), startTime, duration);
             default:
                 throw new IllegalArgumentException("Неизвестный тип задания: " + type);
         }
@@ -74,26 +75,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static Task fromString(String value) {
         String[] parts = value.split(",");
         int id = Integer.parseInt(parts[0]);
-        TaskType type = TaskType.valueOf(parts[1]);
+        String type = parts[1];
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
-        LocalDateTime startTime = LocalDateTime.parse(parts[6]);
-        Duration duration = Duration.parse(parts[7]);
-        Epic epic = null;
-        if (type == TaskType.EPIC) {
-            int numSubtasks = Integer.parseInt(parts[5]);
-            epic = new Epic(id, name, description, status, startTime, duration);
-            for (int i = 0; i < numSubtasks; i++) {
-                epic.addSubtask(null);
-            }
-        } else {
-            int epicId = Integer.parseInt(parts[5]);
-            InMemoryTaskManager taskManager = new InMemoryTaskManager();
-            epic = taskManager.getEpicById(epicId);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+        LocalDateTime startTime = parts.length > 5 && !parts[5].isEmpty() ? LocalDateTime.parse(parts[5], formatter) : null;
+        Duration duration = parts.length > 6 && !parts[6].isEmpty() ? Duration.ofMinutes(Long.parseLong(parts[6])) : null;
+        int epicId = parts.length > 7 ? Integer.parseInt(parts[7]) : -1;
+
+        switch (type) {
+            case "Task":
+                return new Task(id, name, description, status, startTime, duration);
+            case "Epic":
+                return new Epic(id, name, description, status, startTime, duration, taskManager);
+            case "Subtask":
+                return new Subtask(id, name, description, status, epicId, startTime, duration);
+            default:
+                throw new IllegalArgumentException("Неизвестный тип задания: " + type);
         }
-        Task task = new Task(id, name, description, status, startTime, duration );
-        return task;
     }
 
     // Метод сохранения истории в строку
