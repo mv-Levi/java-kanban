@@ -1,30 +1,22 @@
-import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Subtask extends Task {
-    private Epic epic;
+    private int epicId;
 
-
-    public Subtask(int taskId, String name, String description, TaskStatus status, Epic epic, LocalDateTime startTime, Duration duration) {
+    public Subtask(int taskId, String name, String description, TaskStatus status, int epicId,
+                   LocalDateTime startTime, Duration duration) {
         super(taskId, name, description, status, startTime, duration);
-        this.epic = epic;
+        this.epicId = epicId;
     }
 
-
-    public void setEpic(Epic newEpic) {
-        if (newEpic != this.epic) {
-            this.epic = newEpic;
-        } else {
-            System.out.println("Error: Cannot set subtask's epic to itself.");
-        }
-
+    public int getEpicId() {
+        return epicId;
     }
 
-
-
-    public Epic getEpic() {
-        return epic;
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
     }
 
     @Override
@@ -53,11 +45,11 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-        return String.format("Subtask %d: %s (%s) [Epic: %s], StartTime: %s, Duration: %d minutes",
+        return String.format("Subtask %d: %s (%s), [Epic: %d], StartTime: %s, Duration: %d minutes",
                 getTaskId(),
                 getName(),
                 getStatus(),
-                epic.getName(),
+                epicId,
                 (getStartTime() != null ? getStartTime().format(formatter) : "Не указано"),
                 (getDuration() != null ? getDuration().toMinutes() : 0));
     }
@@ -73,8 +65,6 @@ public class Subtask extends Task {
                 getDescription(),
                 (getStartTime() != null ? getStartTime().format(formatter) : ""),
                 (getDuration() != null ? getDuration().toMinutes() : 0),
-                getEpic().getTaskId());
+                epicId);
     }
-
-
 }

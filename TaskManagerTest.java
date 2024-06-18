@@ -36,18 +36,18 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         TaskManager taskManager = new InMemoryTaskManager();
 
         Epic epic = new Epic(1,"Epic 1", "Description 1", TaskStatus.DONE,
-                LocalDateTime.now(), Duration.ofHours(2));
+                LocalDateTime.now(), Duration.ofHours(2), taskManager);
         Subtask subtask = new Subtask(2, "Subtask 1", "Description 1",
-                TaskStatus.NEW, epic, LocalDateTime.of(2022, 1, 1, 9, 0), Duration.ofHours(2));
+                TaskStatus.NEW, epic.getTaskId(), LocalDateTime.of(2022, 1, 1, 9, 0), Duration.ofHours(2));
 
         taskManager.createEpic(epic);
         taskManager.createSubtask(subtask);
 
-        assertTrue(epic.getSubtasks().contains(subtask));
+        assertTrue(epic.getSubtaskIds().contains(subtask.getTaskId()));
 
         taskManager.removeSubtaskById(subtask.getTaskId());
 
-        assertFalse(epic.getSubtasks().contains(subtask));
+        assertFalse(epic.getSubtaskIds().contains(subtask.getTaskId()));
     }
 
     @Test
@@ -73,10 +73,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         TaskManager taskManager = new InMemoryTaskManager();
 
         Epic epic = new Epic(1,"Epic 1", "Description 1", TaskStatus.DONE,
-                LocalDateTime.now(), Duration.ofHours(2));
-        Subtask subtask1 = new Subtask(2, "Early Subtask", "Starts early", TaskStatus.NEW, epic,
+                LocalDateTime.now(), Duration.ofHours(2), taskManager);
+        Subtask subtask1 = new Subtask(2, "Early Subtask", "Starts early", TaskStatus.NEW, epic.getTaskId(),
                 LocalDateTime.of(2022, 1, 1, 9, 0), Duration.ofHours(2));
-        Subtask subtask2 = new Subtask(3, "Late Subtask", "Starts later", TaskStatus.NEW, epic,
+        Subtask subtask2 = new Subtask(3, "Late Subtask", "Starts later", TaskStatus.NEW, epic.getTaskId(),
                 LocalDateTime.of(2022, 1, 1, 11, 0), Duration.ofHours(3));
 
 
@@ -84,14 +84,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createSubtask(subtask1);
         taskManager.createSubtask(subtask2);
 
-        assertTrue(epic.getSubtasks().contains(subtask1));
-        assertTrue(epic.getSubtasks().contains(subtask2));
+        assertTrue(epic.getSubtaskIds().contains(subtask1.getTaskId()));
+        assertTrue(epic.getSubtaskIds().contains(subtask2.getTaskId()));
 
 
         taskManager.removeSubtaskById(subtask1.getTaskId());
 
-        assertFalse(epic.getSubtasks().contains(subtask1));
-        assertTrue(epic.getSubtasks().contains(subtask2));
+        assertFalse(epic.getSubtaskIds().contains(subtask1.getTaskId()));
+        assertTrue(epic.getSubtaskIds().contains(subtask2.getTaskId()));
     }
 
     @Test

@@ -27,8 +27,8 @@ public class Main {
         LocalDateTime startTimeEpic2 = LocalDateTime.of(2022, 5, 22, 10, 0);
         Duration durationEpic2 = Duration.ofHours(4);
 
-        Epic epic1 = new Epic(1, "Epic 1", "Description for Epic 1", TaskStatus.NEW, startTimeEpic1, durationEpic1);
-        Epic epic2 = new Epic(2, "Epic 2", "Description for Epic 2", TaskStatus.DONE, startTimeEpic2, durationEpic2);
+        Epic epic1 = new Epic(1, "Epic 1", "Description for Epic 1", TaskStatus.NEW, startTimeEpic1, durationEpic1, taskManager);
+        Epic epic2 = new Epic(2, "Epic 2", "Description for Epic 2", TaskStatus.DONE, startTimeEpic2, durationEpic2, taskManager);
 
         // Создаем подзадачи для первого эпика
         Subtask subtask1 = new Subtask(
@@ -36,7 +36,7 @@ public class Main {
                 "Subtask 1",
                 "Description for Subtask 1",
                 TaskStatus.NEW,
-                epic1,
+                epic1.getTaskId(),
                 LocalDateTime.now(),
                 Duration.ofHours(2)
         );
@@ -46,7 +46,7 @@ public class Main {
                 "Subtask 2",
                 "Description for Subtask 2",
                 TaskStatus.IN_PROGRESS,
-                epic1,
+                epic1.getTaskId(),
                 LocalDateTime.now().plusHours(1),
                 Duration.ofHours(3)
         );
@@ -56,7 +56,7 @@ public class Main {
                 "Subtask 3",
                 "Description for Subtask 3",
                 TaskStatus.DONE,
-                epic1,
+                epic1.getTaskId(),
                 LocalDateTime.now().plusHours(2),
                 Duration.ofHours(1)
         );
@@ -98,5 +98,6 @@ public class Main {
         historyManager.remove(3);
         System.out.println("History after removing Epic 1:");
         System.out.println(historyManager.getHistory());
+        System.out.println(taskManager.getAllSubtasks());
     }
 }
