@@ -1,8 +1,6 @@
 import java.time.LocalDateTime;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Epic extends Task {
     private List<Integer> subtaskIds = new ArrayList<>();
@@ -43,27 +41,36 @@ public class Epic extends Task {
         updateEndTime();
     }
     public void updateStartTime() {
-        LocalDateTime earliest = null;
+        Map<Integer, Subtask> subtaskMap = new HashMap<>();
         for (int subtaskId : subtaskIds) {
             Subtask subtask = taskManager.getSubtaskById(subtaskId);
-            if (earliest == null || (subtask.getStartTime() != null && subtask.getStartTime().isBefore(earliest))) {
-                earliest = subtask.getStartTime();
-            }
+            subtaskMap.put(subtaskId, subtask);
         }
+
+        LocalDateTime earliest = subtaskMap.values().stream()
+                .map(Subtask::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+
         this.setStartTime(earliest);
     }
 
 
     public void updateEndTime() {
-        LocalDateTime latest = null;
+        Map<Integer, Subtask> subtaskMap = new HashMap<>();
         for (int subtaskId : subtaskIds) {
             Subtask subtask = taskManager.getSubtaskById(subtaskId);
-            LocalDateTime subtaskEndTime = subtask.getStartTime().plus(subtask.getDuration());
-            if (latest == null || (subtaskEndTime != null && subtaskEndTime.isAfter(latest))) {
-                latest = subtaskEndTime;
-            }
+            subtaskMap.put(subtaskId, subtask);
         }
-        this.endTime = latest;
+
+        LocalDateTime latest = subtaskMap.values().stream()
+                .map(subtask -> subtask.getStartTime().plus(subtask.getDuration()))
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        this.setEndTime(latest);
     }
 
 
@@ -96,7 +103,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return String.format("Epic %d: %s (%s), StartTime: %s, Duration: %d minutes, Subtasks: %s",
+        return String.format("Epic %d: %s (%s), StartTime: %s, Duration: %d minutes, subtasks: %s",
                 getTaskId(),
                 getName(),
                 getStatus(),
